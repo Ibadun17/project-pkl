@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tambah Device | Smart Kominfo</title>
+
+  <style>
+    :root{
+      --primary:#0a1f8f;
+      --primary-dark:#081870;
+      --text:#2b2b2b;
+      --panel:#f6f3f3;
+      --border:#cfcfcf;
+      --shadow:0 4px 10px rgba(0,0,0,.18);
+      --radius:4px;
+      --btn:#0a1f8f;
+      --green:#7be087;
+      --green-text:#0c6a22;
+      --red:#ff6b6b;
+      --red-text:#8b0d0d;
+      --tab:#d6d6d6;
+      --tab-text:#3f4aa8;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family: Arial, Helvetica, sans-serif;background:#fff;color:var(--text);}
+
+    .topbar{
+      height:72px;background:var(--primary);
+      display:flex;align-items:center;justify-content:center;
+      color:#fff;font-weight:800;font-size:26px;letter-spacing:.2px;
+    }
+
+    main{padding:26px 28px 60px;max-width:1150px;margin:0 auto;}
+    .layout{display:grid;grid-template-columns: 1.1fr .9fr;gap:60px;align-items:start;}
+
+    .status-row{display:flex;justify-content:center;gap:10px;margin: 6px 0 20px;}
+    .pill{
+      border:none;padding:6px 14px;font-weight:900;border-radius:2px;
+      box-shadow:0 2px 6px rgba(0,0,0,.18);cursor:pointer;font-size:18px;
+    }
+    .pill.on{background:var(--green); color:var(--green-text)}
+    .pill.off{background:var(--red); color:var(--red-text)}
+    .pill.active{outline:2px solid rgba(10,31,143,.25);transform: translateY(-1px);}
+    .pill:disabled{opacity:.7;cursor:not-allowed}
+
+    .form{width: 420px;max-width:100%;}
+    .field{margin-bottom:18px}
+    label{display:block;color:#7b7b7b;font-weight:700;font-size:20px;margin:0 0 8px;}
+    input{
+      width:100%;height:38px;border:1px solid var(--border);
+      border-radius:3px;padding:0 12px;font-size:14px;outline:none;background:#fff;
+    }
+    input::placeholder{color:#b7b7b7}
+
+    .btn-row{display:flex;gap:12px;margin: 6px 0 28px;}
+    .btn{
+      background:var(--btn);color:#fff;border:none;border-radius:3px;
+      padding:10px 18px;font-weight:800;cursor:pointer;
+      box-shadow:0 2px 6px rgba(0,0,0,.18);
+    }
+    .btn:hover{background:var(--primary-dark)}
+    .btn:active{transform:translateY(1px)}
+    .btn:disabled{opacity:.7;cursor:not-allowed}
+    .btn-save{margin-top: 4px;width: 120px;padding:8px 18px;}
+
+    .panel{
+      background:var(--panel);
+      border:1px solid #e1e1e1;
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px 16px 18px;
+      width: 420px;
+      max-width:100%;
+    }
+
+    .tabs{display:flex;justify-content:center;gap:14px;margin-bottom:14px;}
+    .tab{
+      border:none;background:var(--tab);color:var(--tab-text);
+      font-weight:800;padding:6px 26px;border-radius:8px;cursor:pointer;
+    }
+    .tab.active{background:#d0d0d0;box-shadow: inset 0 -2px 0 rgba(0,0,0,.08);}
+
+    .hint{text-align:center;color:#b1b1b1;font-size:13px;margin: 2px 0 10px;}
+
+    .output{
+      height:46px;border:1px solid #cfcfcf;border-radius:3px;background:#fff;
+      padding:10px 12px;color:#9a9a9a;font-size:14px;display:flex;align-items:center;
+    }
+    .output-area{
+      margin-top:12px;height: 260px;border:1px solid #cfcfcf;border-radius:3px;background:#fff;
+      padding:12px;color:#777;font-size:14px;overflow:auto;white-space:pre-wrap;
+    }
+
+    .msg{
+      display:none;margin:0 0 14px;padding:10px 12px;border-radius:4px;
+      font-size:14px;background:#fff;border:1px solid #ddd;color:#444;
+    }
+    .msg.ok{border-color:#37b36b;color:#1c7f45;background:#f2fff7;}
+    .msg.err{border-color:#e34b4b;color:#a01818;background:#fff2f2;}
+
+    @media (max-width: 980px){
+      .layout{grid-template-columns:1fr; gap:30px}
+      .panel, .form{width:100%}
+      .status-row{justify-content:flex-start}
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">Tambah Device</header>
+
+  <main>
+    <div class="layout">
+
+      <!-- LEFT -->
+      <section>
+        <div class="status-row" aria-label="Status ON OFF">
+          <button class="pill on active" id="btnOn" type="button" onclick="setLamp(true)">ON</button>
+          <button class="pill off" id="btnOff" type="button" onclick="setLamp(false)">OFF</button>
+        </div>
+
+        <div id="msg" class="msg"></div>
+
+        <form class="form" id="deviceForm">
+          <div class="field">
+            <label for="deviceId">Device ID</label>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <input id="deviceId" type="text" placeholder="Masukkan Device ID" style="flex:1;">
+              <span id="connBadge" style="
+                display:none;
+                padding:6px 10px;border-radius:2px;font-weight:800;font-size:12px;
+                background:#7be087;color:#0c6a22;box-shadow:0 2px 6px rgba(0,0,0,.12);
+                min-width:92px;text-align:center;
+              ">Connected</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="function">Function (Tuya Code)</label>
+            <input id="function" type="text" placeholder="Contoh: switch_1 / switch">
+          </div>
+
+          <div class="btn-row">
+            <button class="btn" id="btnCek" type="button" onclick="cekKoneksi()">Cek Koneksi</button>
+            <button class="btn" type="button" onclick="hapusOutput()">Hapus Output</button>
+          </div>
+
+          <div class="field">
+            <label for="nama">Nama Perangkat</label>
+            <input id="nama" type="text" placeholder="Masukkan Nama Perangkat">
+          </div>
+
+          <div class="field">
+            <label for="lokasi">Lokasi</label>
+            <input id="lokasi" type="text" placeholder="Ketik Lokasi">
+          </div>
+
+          <button class="btn btn-save" id="btnSave" type="submit">Simpan</button>
+        </form>
+      </section>
+
+      <!-- RIGHT -->
+      <aside class="panel" aria-label="Panel Output">
+        <div class="tabs">
+          <button class="tab active" id="tabStatus" type="button" onclick="setTab('status')">Status</button>
+          <button class="tab" id="tabFunction" type="button" onclick="setTab('function')">Function</button>
+          <button class="tab" id="tabDevice" type="button" onclick="setTab('device')">Device</button>
+        </div>
+
+        <div class="hint">Klik Tombol Diatas</div>
+
+        <div class="output" id="outputLine"></div>
+        <div class="output-area" id="outputArea"></div>
+      </aside>
+
+    </div>
+  </main>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script>
+    requireAuth();
+
+    let currentTab = 'status';
+    let lampOn = true;
+    let tuyaData = null; // hasil /api/tuya/check.php
+
+    function showMsg(type, text){
+      const el = document.getElementById('msg');
+      el.className = 'msg ' + (type === 'ok' ? 'ok' : 'err');
+      el.textContent = text;
+      el.style.display = 'block';
+    }
+    function writeLine(text){ document.getElementById('outputLine').textContent = text; }
+    function setOutput(text){ document.getElementById('outputArea').textContent = text; }
+    function appendOutput(text){
+      const el = document.getElementById('outputArea');
+      el.textContent += text;
+      el.scrollTop = el.scrollHeight;
+    }
+    function prettify(obj){ return JSON.stringify(obj ?? {}, null, 2); }
+
+    function renderTab(tab){
+      if(!tuyaData){
+        writeLine('Klik "Cek Koneksi" dulu untuk ambil data Tuya.');
+        setOutput('');
+        return;
+      }
+
+      if(tab === 'status'){
+        const list = Array.isArray(tuyaData.status) ? tuyaData.status : [];
+        const onlineItem = list.find(x => x && x.code === 'online');
+        const onlineVal = onlineItem ? onlineItem.value : null;
+        const switchItem = list.find(x => x && typeof x.code === 'string' && x.code.startsWith('switch'));
+        const switchVal = switchItem ? switchItem.value : null;
+
+        writeLine(`Status: ${onlineVal === null ? 'OK' : (onlineVal ? 'ONLINE' : 'OFFLINE')}`);
+        setOutput(
+          `ONLINE: ${onlineVal === null ? '-' : onlineVal}\n` +
+          `SWITCH: ${switchVal === null ? '-' : switchVal}\n\n` +
+          `RAW STATUS:\n` + prettify(list)
+        );
+        return;
+      }
+
+      if(tab === 'function'){
+        writeLine('Function (diketik manual)');
+        setOutput(
+          `Ketik Function (Tuya Code) di form kiri.\n` +
+          `Contoh umum: switch_1 atau switch.\n\n` +
+          `Tips: lihat RAW STATUS untuk daftar code.\n`
+        );
+        return;
+      }
+
+      if(tab === 'device'){
+        writeLine('Info Device');
+        setOutput(prettify(tuyaData.device));
+        return;
+      }
+    }
+
+    function setTab(tab){
+      currentTab = tab;
+      document.getElementById('tabStatus').classList.toggle('active', tab === 'status');
+      document.getElementById('tabFunction').classList.toggle('active', tab === 'function');
+      document.getElementById('tabDevice').classList.toggle('active', tab === 'device');
+      renderTab(tab);
+    }
+
+    function setPillState(isOn){
+      lampOn = isOn;
+      document.getElementById('btnOn').classList.toggle('active', isOn);
+      document.getElementById('btnOff').classList.toggle('active', !isOn);
+      writeLine(`Status dipilih: ${isOn ? 'ON' : 'OFF'}`);
+    }
+
+    async function sendSwitchToTuya(isOn){
+      const deviceId = document.getElementById('deviceId').value.trim();
+      const code = document.getElementById('function').value.trim();
+
+      if(!deviceId) throw new Error('Device ID masih kosong.');
+      if(!tuyaData) throw new Error('Klik "Cek Koneksi" dulu.');
+      if(!code) throw new Error('Isi Function (Tuya Code) dulu.');
+
+      const status = isOn ? 'ON' : 'OFF';
+
+      const onBtn = document.getElementById('btnOn');
+      const offBtn = document.getElementById('btnOff');
+      onBtn.disabled = true;
+      offBtn.disabled = true;
+
+      try{
+        writeLine(`Mengirim perintah ${status} ke Tuya...`);
+
+        await apiFetch('/tuya/switch.php', {
+          method: 'POST',
+          body: { device_id: deviceId, status, code }
+        });
+
+        appendOutput(`COMMAND ✅ ${status}\nDevice ID: ${deviceId}\nFunction: ${code}\n\n`);
+
+        // refresh status setelah command
+        const res = await apiFetch('/tuya/check.php?device_id=' + encodeURIComponent(deviceId));
+        tuyaData = res.data;
+        renderTab(currentTab);
+
+        showMsg('ok', `Perintah ${status} berhasil dikirim.`);
+      } finally {
+        onBtn.disabled = false;
+        offBtn.disabled = false;
+      }
+    }
+
+    async function setLamp(isOn){
+      setPillState(isOn);
+
+      if(tuyaData){
+        try{
+          await sendSwitchToTuya(isOn);
+        }catch(err){
+          showMsg('err', err.message);
+          appendOutput(`ERROR COMMAND: ${err.message}\n\n`);
+          setPillState(!isOn); // rollback
+        }
+      }else{
+        appendOutput(`(Belum connect) Status dipilih: ${isOn ? 'ON' : 'OFF'}\n\n`);
+      }
+    }
+
+    async function cekKoneksi(){
+      const deviceId = document.getElementById('deviceId').value.trim();
+      if(!deviceId){
+        writeLine('Isi Device ID dulu ya.');
+        return;
+      }
+
+      const btn = document.getElementById('btnCek');
+      btn.disabled = true;
+      btn.textContent = 'Mengecek...';
+      document.getElementById('connBadge').style.display = 'none';
+
+      try{
+        writeLine('Cek koneksi ke Tuya...');
+        setOutput('');
+
+        const res = await apiFetch('/tuya/check.php?device_id=' + encodeURIComponent(deviceId));
+        tuyaData = res.data;
+
+        document.getElementById('connBadge').style.display = 'inline-block';
+        appendOutput(`CONNECTED ✅\nDevice ID: ${deviceId}\n\n`);
+        renderTab(currentTab);
+
+        showMsg('ok', 'Device berhasil connected.');
+      }catch(err){
+        tuyaData = null;
+        document.getElementById('connBadge').style.display = 'none';
+        showMsg('err', err.message);
+        setOutput(`GAGAL CONNECT ❌\n${err.message}\n`);
+      }finally{
+        btn.disabled = false;
+        btn.textContent = 'Cek Koneksi';
+      }
+    }
+
+    function hapusOutput(){
+      document.getElementById('outputLine').textContent = '';
+      document.getElementById('outputArea').textContent = '';
+      document.getElementById('msg').style.display = 'none';
+      document.getElementById('connBadge').style.display = 'none';
+      tuyaData = null;
+    }
+
+    // SUBMIT -> SIMPAN KE DB
+    document.getElementById('deviceForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const device_id = document.getElementById('deviceId').value.trim();
+      const switch_code = document.getElementById('function').value.trim();
+      const nama_perangkat = document.getElementById('nama').value.trim();
+      const lokasi = document.getElementById('lokasi').value.trim();
+
+      if(!device_id || !switch_code || !nama_perangkat || !lokasi){
+        showMsg('err', 'Semua field wajib diisi.');
+        return;
+      }
+      if(!tuyaData){
+        showMsg('err', 'Klik "Cek Koneksi" dulu supaya device benar-benar tersambung.');
+        return;
+      }
+
+      const btn = document.getElementById('btnSave');
+      btn.disabled = true;
+      btn.textContent = 'Menyimpan...';
+
+      try{
+        const res = await apiFetch('/devices/create.php', {
+          method: 'POST',
+          body: {
+            device_id,
+            fungsi: switch_code,
+            switch_code,
+            nama_perangkat,
+            lokasi
+          }
+        });
+
+        showMsg('ok', res.message || 'Device berhasil ditambahkan');
+        appendOutput(`SIMPAN ✅ ID DB: ${res.data?.id ?? '-'}\n\n`);
+
+
+        setTimeout(() => {
+        window.location.href = 'dashboard-monitoring.html';
+        }, 600);
+
+
+        // reset
+        document.getElementById('deviceId').value = '';
+        document.getElementById('function').value = '';
+        document.getElementById('nama').value = '';
+        document.getElementById('lokasi').value = '';
+        document.getElementById('connBadge').style.display = 'none';
+        tuyaData = res?.data ?? res;   // biar nggak null
+if(!tuyaData) throw new Error('Response kosong dari server. Cek error di /api/tuya/check.php');
+        writeLine('Klik "Cek Koneksi" untuk mengisi Status/Function/Device.');
+      }catch(err){
+        showMsg('err', err.message);
+        appendOutput(`ERROR: ${err.message}\n\n`);
+      }finally{
+        btn.disabled = false;
+        btn.textContent = 'Simpan';
+      }
+    });
+
+    writeLine('Klik "Cek Koneksi" untuk mengisi Status/Function/Device.');
+  </script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Register | Diskominfo Kota Madiun</title>
+
+  <style>
+    :root{
+      --primary:#0a1f8f;
+      --primary-dark:#081870;
+      --text:#333;
+      --border:#bdbdbd;
+      --card:#f6f3f3;
+      --shadow:0 4px 10px rgba(0,0,0,.18);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family: Arial, Helvetica, sans-serif;background:#fff;color:var(--text);}
+
+    .topbar{height:72px;background:var(--primary);display:flex;align-items:center;padding:0 40px;}
+    .brand{display:flex;align-items:center;gap:14px;color:#fff;}
+    .brand img{width:48px;}
+    .brand-text{font-size:14px;font-weight:700;line-height:1.2;text-transform:uppercase;}
+
+    main{min-height:calc(100vh - 72px);display:flex;flex-direction:column;align-items:center;padding-top:70px;}
+
+    .card{
+      width:560px;max-width:92%;
+      background:var(--card);
+      border-radius:4px;
+      box-shadow:var(--shadow);
+      padding:36px 60px;
+      border:1px solid #e0e0e0;
+    }
+    .card h1{text-align:center;color:var(--primary);margin:0 0 26px;font-size:30px;letter-spacing:.5px;}
+
+    .field{margin-bottom:16px;}
+    label{display:block;font-size:18px;font-weight:700;color:#6b6b6b;margin-bottom:8px;}
+    input{
+      width:100%;height:38px;border:1px solid var(--border);
+      padding:0 12px;font-size:14px;border-radius:2px;background:#fff;outline:none;
+    }
+    input::placeholder{color:#b5b5b5;}
+
+    .btn-register{
+      display:block;margin:26px auto 0;padding:6px 28px;
+      background:var(--primary);color:#fff;border:none;border-radius:4px;
+      font-weight:700;cursor:pointer;
+    }
+    .btn-register:hover{background:var(--primary-dark);}
+
+    .footer{
+      width:560px;max-width:92%;
+      text-align:center;margin-top:22px;font-size:14px;color:#9a9a9a;
+    }
+    .footer a{color:var(--primary);text-decoration:none;font-weight:600;}
+    .footer a:hover{text-decoration:underline;}
+
+    .msg{
+      display:none;
+      margin:0 0 14px;
+      padding:10px 12px;
+      border-radius:4px;
+      font-size:14px;
+      background:#fff;
+      border:1px solid #ddd;
+      color:#444;
+    }
+    .msg.ok{border-color:#37b36b;color:#1c7f45;background:#f2fff7;}
+    .msg.err{border-color:#e34b4b;color:#a01818;background:#fff2f2;}
+
+    @media(max-width:500px){
+      .card{padding:28px 20px}
+      label{font-size:16px}
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="../assets/img/logo.png" alt="Logo Diskominfo">
+      <div class="brand-text">
+        DINAS KOMUNIKASI DAN INFORMATIKA<br>
+        KOTA MADIUN
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h1>DAFTAR</h1>
+
+      <div id="msg" class="msg"></div>
+
+      <form id="registerForm">
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="Masukkan Email" autocomplete="email">
+        </div>
+
+        <div class="field">
+          <label for="pass">Password</label>
+          <input id="pass" type="password" placeholder="Masukkan Password" autocomplete="new-password">
+        </div>
+
+        <div class="field">
+          <label for="pass2">Ulangi Password</label>
+          <input id="pass2" type="password" placeholder="Masukkan Password" autocomplete="new-password">
+        </div>
+
+        <button class="btn-register" id="btnReg" type="submit">Daftar</button>
+      </form>
+    </section>
+
+    <div class="footer">
+      Sudah punya akun? <a href="login.html">Masuk</a>
+    </div>
+  </main>
+
+  <script src="../js/api.js"></script>
+  <script>
+    function showMsg(type, text){
+      const el = document.getElementById('msg');
+      el.className = 'msg ' + (type === 'ok' ? 'ok' : 'err');
+      el.textContent = text;
+      el.style.display = 'block';
+    }
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('pass').value;
+      const pass2 = document.getElementById('pass2').value;
+
+      if(!email || !password || !pass2){
+        showMsg('err', 'Semua field wajib diisi.');
+        return;
+      }
+      if(password.length < 6){
+        showMsg('err', 'Password minimal 6 karakter.');
+        return;
+      }
+      if(password !== pass2){
+        showMsg('err', 'Password dan Ulangi Password harus sama.');
+        return;
+      }
+
+      const btn = document.getElementById('btnReg');
+      btn.disabled = true;
+      btn.textContent = 'Memproses...';
+
+      try{
+        const res = await apiFetch('/auth/register.php', {
+          method: 'POST',
+          body: { email, password }
+        });
+
+        showMsg('ok', res.message || 'Register sukses, silakan login');
+        setTimeout(() => window.location.href = 'login.html', 700);
+      }catch(err){
+        showMsg('err', err.message);
+      }finally{
+        btn.disabled = false;
+        btn.textContent = 'Daftar';
+      }
+    });
+  </script>
+</body>
+</html>

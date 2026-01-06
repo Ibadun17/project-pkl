@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pengaturan Jadwal Otomatis | Smart Kominfo</title>
+
+  <style>
+    :root{
+      --primary:#0a1f8f;
+      --primary-dark:#081870;
+      --panel:#f6f3f3;
+      --border:#d7d7d7;
+      --shadow:0 4px 10px rgba(0,0,0,.18);
+      --text:#2c2c2c;
+      --muted:#7b7b7b;
+      --radius:4px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family: Arial, Helvetica, sans-serif;background:#fff;color:var(--text);}
+    .topbar{height:72px;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:28px;}
+    main{max-width:1100px;margin:0 auto;padding:22px 22px 60px;}
+
+    .msg{
+      display:none;margin:0 0 14px;padding:10px 12px;border-radius:4px;font-size:14px;
+      background:#fff;border:1px solid #ddd;color:#444;
+    }
+    .msg.ok{border-color:#37b36b;color:#1c7f45;background:#f2fff7;}
+    .msg.err{border-color:#e34b4b;color:#a01818;background:#fff2f2;}
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .card{
+      background:var(--panel);
+      border:1px solid #e1e1e1;
+      border-radius:3px;
+      box-shadow:var(--shadow);
+      padding:18px 18px;
+    }
+
+    h2{margin:0 0 12px;font-size:22px;font-weight:900;color:#2c2c2c;}
+    label{display:block;margin:0 0 6px;font-size:15px;font-weight:800;color:#555;}
+    .field{margin-bottom:14px;}
+
+    input, select{
+      width:100%;height:40px;border:1px solid var(--border);border-radius:3px;
+      padding:0 12px;background:#fff;outline:none;font-size:14px;
+    }
+
+    .row2{
+      display:grid;grid-template-columns:1fr 1fr;gap:14px;
+    }
+
+    .days{
+      display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;
+    }
+    .day{
+      display:flex;align-items:center;gap:8px;
+      border:1px solid #cfd6ff;border-radius:999px;padding:8px 12px;
+      background:#fff;
+      font-weight:800;color:#2c2c2c;
+      user-select:none;
+    }
+    .day input{width:16px;height:16px}
+
+    .btn{
+      background:var(--primary);color:#fff;border:none;border-radius:4px;
+      font-weight:800;padding:10px 18px;font-size:16px;cursor:pointer;
+      box-shadow:0 2px 6px rgba(0,0,0,.18);
+    }
+    .btn:hover{background:var(--primary-dark)}
+    .btn:disabled{opacity:.7;cursor:not-allowed}
+
+    table{width:100%;border-collapse:collapse;background:#fff;border-radius:3px;overflow:hidden;border:1px solid #e1e1e1;}
+    thead th{padding:10px 12px;background:#efefef;border-bottom:1px solid #ddd;text-align:left;font-weight:900;}
+    tbody td{padding:10px 12px;border-bottom:1px solid #eee;vertical-align:middle;}
+    tbody tr:last-child td{border-bottom:none;}
+    .muted{color:#888;font-size:13px}
+
+    .pill{
+      display:inline-block;
+      padding:4px 10px;border-radius:999px;
+      font-weight:900;font-size:12px;
+      background:#e9ecff;color:#1b2aa5;
+    }
+    .pill.off{background:#ffecec;color:#a01818;}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .btn2{padding:8px 10px;font-size:13px;border-radius:4px;border:none;cursor:pointer;font-weight:900;}
+    .btn-del{background:#b11b1b;color:#fff;}
+    .btn-del:hover{background:#8f1414}
+    .btn-toggle{background:#0a1f8f;color:#fff;}
+    .btn-toggle:hover{background:#081870}
+
+    @media(max-width: 980px){
+      .grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">Pengaturan Jadwal Otomatis</header>
+
+  <main>
+    <div id="msg" class="msg"></div>
+
+    <div class="grid">
+      <!-- BUAT JADWAL -->
+      <section class="card">
+        <h2>Buat Jadwal</h2>
+
+        <div class="field">
+          <label for="targetType">Target Jadwal</label>
+          <select id="targetType">
+            <option value="device" selected>Per Device</option>
+            <option value="group">Per Group</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="targetId">Device / Group</label>
+          <select id="targetId">
+            <option value="">Loading...</option>
+          </select>
+          <div class="muted" id="hintTarget">Daftar device diambil dari tabel <b>devices</b>.</div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="timeOn">Jam ON</label>
+            <input id="timeOn" type="time" value="18:00" />
+          </div>
+          <div class="field">
+            <label for="timeOff">Jam OFF</label>
+            <input id="timeOff" type="time" value="06:00" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="tuyaCode">Tuya Code</label>
+          <input id="tuyaCode" type="text" value="switch_1" />
+          <div class="muted">Default biasanya <b>switch_1</b>.</div>
+        </div>
+
+        <div class="field">
+          <label>Hari Aktif</label>
+          <div class="days">
+            <label class="day"><input type="checkbox" value="1" checked> Sen</label>
+            <label class="day"><input type="checkbox" value="2" checked> Sel</label>
+            <label class="day"><input type="checkbox" value="3" checked> Rab</label>
+            <label class="day"><input type="checkbox" value="4" checked> Kam</label>
+            <label class="day"><input type="checkbox" value="5" checked> Jum</label>
+            <label class="day"><input type="checkbox" value="6" checked> Sab</label>
+            <label class="day"><input type="checkbox" value="7" checked> Min</label>
+          </div>
+        </div>
+
+        <button class="btn" id="btnSave" type="button">Simpan Jadwal</button>
+      </section>
+
+      <!-- DAFTAR JADWAL -->
+      <section class="card">
+        <h2>Daftar Jadwal</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Target</th>
+              <th>ON</th>
+              <th>OFF</th>
+              <th>Hari</th>
+              <th>Code</th>
+              <th>Aktif</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="7" class="muted">Loading...</td></tr>
+          </tbody>
+        </table>
+
+        <div class="muted" style="margin-top:10px;">
+          Kalau jadwal sudah dibuat, nanti saat hosting + cron aktif, jadwal ini akan otomatis menjalankan ON/OFF.
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script>
+    requireAuth();
+
+    function showMsg(type, text){
+      const el = document.getElementById('msg');
+      el.className = 'msg ' + (type === 'ok' ? 'ok' : 'err');
+      el.textContent = text;
+      el.style.display = 'block';
+    }
+
+    function escapeHtml(str){
+      return String(str ?? '')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'","&#039;");
+    }
+
+    function daysLabel(mask){
+      const map = {1:'Sen',2:'Sel',3:'Rab',4:'Kam',5:'Jum',6:'Sab',7:'Min'};
+      const arr = String(mask||'').split(',').map(s=>parseInt(s,10)).filter(n=>n>=1 && n<=7);
+      return arr.map(d=>map[d]).join(', ') || '-';
+    }
+
+    let OPTIONS = {devices:[], groups:[]};
+
+    async function loadOptions(){
+      const res = await apiFetch('/schedules/options.php');
+      OPTIONS = res.data || {devices:[], groups:[]};
+      renderTargetSelect();
+    }
+
+    function renderTargetSelect(){
+      const type = document.getElementById('targetType').value;
+      const sel = document.getElementById('targetId');
+      const hint = document.getElementById('hintTarget');
+
+      if(type === 'device'){
+        hint.innerHTML = 'Daftar device diambil dari tabel <b>devices</b>.';
+        const items = OPTIONS.devices || [];
+        sel.innerHTML = `<option value="">Pilih Device</option>` + items.map(d => {
+          const label = `${d.nama_perangkat || d.device_id} (${d.device_id})`;
+          return `<option value="${escapeHtml(d.device_id)}">${escapeHtml(label)}</option>`;
+        }).join('');
+      }else{
+        hint.innerHTML = 'Daftar group diambil dari tabel <b>device_groups</b>.';
+        const items = OPTIONS.groups || [];
+        sel.innerHTML = `<option value="">Pilih Group</option>` + items.map(g => {
+          const label = `${g.nama_group || ('Group ' + g.id)} (ID ${g.id})`;
+          return `<option value="${escapeHtml(g.id)}">${escapeHtml(label)}</option>`;
+        }).join('');
+      }
+    }
+
+    async function loadSchedules(){
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = `<tr><td colspan="7" class="muted">Loading...</td></tr>`;
+
+      const res = await apiFetch('/schedules/list.php');
+      const items = res.data || [];
+
+      if(!items.length){
+        tbody.innerHTML = `<tr><td colspan="7" class="muted">Belum ada jadwal.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = items.map(it => {
+        const target = it.target_type === 'device'
+          ? `Device: ${it.target_id}`
+          : `Group: ${it.target_id}`;
+
+        const activePill = it.is_active == 1
+          ? `<span class="pill">Aktif</span>`
+          : `<span class="pill off">Nonaktif</span>`;
+
+        const toggleText = it.is_active == 1 ? 'Nonaktifkan' : 'Aktifkan';
+
+        return `
+          <tr>
+            <td>${escapeHtml(target)}</td>
+            <td>${escapeHtml(it.time_on)}</td>
+            <td>${escapeHtml(it.time_off)}</td>
+            <td>${escapeHtml(daysLabel(it.days_mask))}</td>
+            <td>${escapeHtml(it.tuya_code || 'switch_1')}</td>
+            <td>${activePill}</td>
+            <td>
+              <div class="actions">
+                <button class="btn2 btn-toggle" type="button" onclick="toggleSchedule(${it.id}, ${it.is_active==1?0:1})">${toggleText}</button>
+                <button class="btn2 btn-del" type="button" onclick="deleteSchedule(${it.id})">Hapus</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function createSchedule(){
+      const target_type = document.getElementById('targetType').value;
+      const target_id = document.getElementById('targetId').value;
+      const time_on = document.getElementById('timeOn').value;
+      const time_off = document.getElementById('timeOff').value;
+      const tuya_code = document.getElementById('tuyaCode').value.trim() || 'switch_1';
+      const days = Array.from(document.querySelectorAll('.day input:checked')).map(x => parseInt(x.value,10));
+
+      if(!target_id) return showMsg('err', 'Pilih target dulu (device/group).');
+      if(!time_on || !time_off) return showMsg('err', 'Jam ON dan OFF wajib diisi.');
+      if(!days.length) return showMsg('err', 'Minimal pilih 1 hari.');
+
+      const btn = document.getElementById('btnSave');
+      btn.disabled = true;
+      btn.textContent = 'Menyimpan...';
+
+      try{
+        const res = await apiFetch('/schedules/create.php', {
+          method:'POST',
+          body:{ target_type, target_id, time_on, time_off, tuya_code, days, is_active:1 }
+        });
+        showMsg('ok', res.message || 'Jadwal berhasil dibuat');
+        await loadSchedules();
+      }catch(err){
+        showMsg('err', err.message);
+      }finally{
+        btn.disabled = false;
+        btn.textContent = 'Simpan Jadwal';
+      }
+    }
+
+    async function toggleSchedule(id, is_active){
+      try{
+        await apiFetch('/schedules/toggle.php', {method:'POST', body:{id, is_active}});
+        await loadSchedules();
+      }catch(err){
+        showMsg('err', err.message);
+      }
+    }
+    window.toggleSchedule = toggleSchedule;
+
+    async function deleteSchedule(id){
+      if(!confirm('Hapus jadwal ini?')) return;
+      try{
+        await apiFetch('/schedules/delete.php', {method:'POST', body:{id}});
+        await loadSchedules();
+      }catch(err){
+        showMsg('err', err.message);
+      }
+    }
+    window.deleteSchedule = deleteSchedule;
+
+    document.getElementById('btnSave').addEventListener('click', createSchedule);
+    document.getElementById('targetType').addEventListener('change', renderTargetSelect);
+
+    (async function init(){
+      await loadOptions();
+      await loadSchedules();
+    })();
+  </script>
+</body>
+</html>

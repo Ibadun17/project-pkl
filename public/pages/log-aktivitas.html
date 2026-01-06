@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Log Aktivitas | Smart Kominfo</title>
+
+  <style>
+    :root{
+      --primary:#0a1f8f;
+      --primary-dark:#081870;
+
+      --panel:#f6f3f3;
+      --border:#d7d7d7;
+      --shadow:0 4px 10px rgba(0,0,0,.18);
+
+      --text:#2c2c2c;
+      --muted:#a6a6a6;
+
+      --badge-on:#2fa86a;
+      --badge-off:#e34b4b;
+      --badge-success:#2fa86a;
+      --badge-fail:#e34b4b;
+
+      --radius:4px;
+    }
+
+    *{box-sizing:border-box}
+    body{margin:0;font-family: Arial, Helvetica, sans-serif;background:#fff;color:var(--text);}
+
+    .topbar{
+      height:72px;background:var(--primary);
+      display:flex;align-items:center;justify-content:center;
+      color:#fff;font-weight:800;font-size:28px;letter-spacing:.2px;
+    }
+
+    main{max-width:1100px;margin:0 auto;padding:18px 22px 60px;}
+
+    .search-wrap{
+      background:var(--panel);
+      border:1px solid #e3e3e3;
+      border-radius:3px;
+      padding:10px 14px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      box-shadow:0 2px 6px rgba(0,0,0,.08);
+    }
+    .search-wrap svg{opacity:.6}
+    .search{
+      width:100%;
+      border:none;
+      outline:none;
+      background:transparent;
+      font-size:18px;
+      color:#777;
+    }
+    .search::placeholder{color:#bcbcbc}
+
+    .filters{
+      margin:18px 0 18px;
+      display:grid;
+      grid-template-columns: repeat(4, minmax(200px, 1fr));
+      gap:18px;
+    }
+
+    .select{
+      position:relative;
+      background:#fff;
+      border:1px solid #dedede;
+      border-radius:3px;
+      height:44px;
+      display:flex;
+      align-items:center;
+      padding:0 12px;
+      box-shadow:0 2px 6px rgba(0,0,0,.08);
+    }
+
+    .select select{
+      width:100%;
+      border:none;
+      outline:none;
+      font-size:18px;
+      font-weight:800;
+      color:var(--primary);
+      appearance:none;
+      background:transparent;
+      padding-right:34px;
+      cursor:pointer;
+    }
+
+    .select:after{
+      content:"";
+      position:absolute;
+      right:14px;
+      width:10px;height:10px;
+      border-right:2px solid #666;
+      border-bottom:2px solid #666;
+      transform: rotate(45deg);
+      pointer-events:none;
+      opacity:.8;
+    }
+
+    .table-panel{
+      background:#f1f1f1;
+      border:1px solid var(--border);
+      border-radius:3px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    table{width:100%;border-collapse:collapse;}
+    thead th{
+      text-align:left;
+      padding:12px 18px;
+      background:#efefef;
+      border-bottom:2px solid var(--border);
+      font-size:18px;
+      font-weight:900;
+      color:#2c2c2c;
+      white-space:nowrap;
+    }
+
+    tbody td{
+      padding:12px 18px;
+      border-bottom:2px solid #dbdbdb;
+      background:#f6f6f6;
+      font-size:16px;
+      color:#2f2f2f;
+      vertical-align:middle;
+    }
+
+    .badge{
+      display:inline-block;
+      padding:4px 12px;
+      border-radius:2px;
+      color:#fff;
+      font-weight:900;
+      min-width:70px;
+      text-align:center;
+    }
+    .badge.on{background:var(--badge-on)}
+    .badge.off{background:var(--badge-off)}
+    .badge.success{background:var(--badge-success)}
+    .badge.fail{background:var(--badge-fail)}
+
+    .pagination{
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      padding:10px 14px;
+      background:#efefef;
+      border-top:2px solid var(--border);
+      color:var(--primary);
+      font-weight:700;
+      user-select:none;
+      align-items:center;
+    }
+    .page{
+      cursor:pointer;
+      padding:2px 8px;
+      border-radius:3px;
+      border:1px solid transparent;
+    }
+    .page:hover{background:#e4e7ff;}
+    .page.disabled{opacity:.4; cursor:not-allowed;}
+    .muted{color:#888}
+
+    .msg{
+      display:none;
+      margin:14px 0 0;
+      padding:10px 12px;
+      border-radius:4px;
+      font-size:14px;
+      background:#fff;
+      border:1px solid #ddd;
+      color:#444;
+    }
+    .msg.err{border-color:#e34b4b;color:#a01818;background:#fff2f2;}
+
+    @media (max-width: 980px){
+      .filters{grid-template-columns:1fr;}
+      .select select{font-size:16px}
+      thead th{font-size:16px}
+      tbody td{font-size:14px}
+      .search{font-size:16px}
+    }
+
+    .badge.neutral{background:#9a9a9a;}
+  </style>
+</head>
+
+<body>
+  <header class="topbar">Log Aktivitas</header>
+
+  <main>
+    <div class="search-wrap" role="search">
+      <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="#666" d="M10 2a8 8 0 105.293 14.293l4.207 4.207 1.414-1.414-4.207-4.207A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
+      </svg>
+      <input id="search" class="search" type="text" placeholder="Cari device, user, group..." />
+    </div>
+
+    <div id="msg" class="msg"></div>
+
+    <section class="filters" aria-label="Filter Log">
+      <div class="select">
+        <select id="fTanggal">
+          <option value="">Tanggal (All)</option>
+          <option value="today">Hari ini</option>
+          <option value="7">7 Hari</option>
+          <option value="30">30 Hari</option>
+        </select>
+      </div>
+
+      <div class="select">
+        <select id="fStatus">
+          <option value="">Status (All)</option>
+          <option value="ON">Status ON</option>
+          <option value="OFF">Status OFF</option>
+        </select>
+      </div>
+
+      <div class="select">
+        <select id="fHasil">
+          <option value="">Hasil (All)</option>
+          <option value="SUKSES">Sukses</option>
+          <option value="GAGAL">Gagal</option>
+        </select>
+      </div>
+
+      <div class="select">
+        <select id="fLimit">
+          <option value="10" selected>Limit 10</option>
+          <option value="25">Limit 25</option>
+          <option value="50">Limit 50</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="table-panel" aria-label="Tabel Log Aktivitas">
+      <table>
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Waktu</th>
+            <th>Group/Area</th>
+            <th>Device ID</th>
+            <th>User</th>
+            <th>Status</th>
+            <th>Hasil</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="7" class="muted">Loading...</td></tr>
+        </tbody>
+      </table>
+
+      <div class="pagination">
+        <span class="muted" id="infoPage">Page 1</span>
+        <span class="page" id="btnPrev">Prev</span>
+        <span class="page" id="btnNext">Next</span>
+      </div>
+    </section>
+  </main>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script>
+    requireAuth();
+
+    let page = 1;
+    let totalPages = 1;
+
+    function showErr(text){
+      const el = document.getElementById('msg');
+      el.className = 'msg err';
+      el.textContent = text;
+      el.style.display = 'block';
+    }
+
+    function fmtDateTime(ts){
+      if(!ts) return {date:'-', time:'-'};
+      const s = String(ts).replace('T',' ');
+      return { date: s.slice(0,10), time: s.slice(11,19) };
+    }
+
+    function badgeStatus(s){
+      const up = String(s ?? '').toUpperCase();
+      if(up === 'ON') return `<span class="badge on">ON</span>`;
+      if(up === 'OFF') return `<span class="badge off">OFF</span>`;
+      return `<span class="badge neutral">-</span>`; // atau buat class baru "neutral"
+    }
+
+
+    function badgeHasil(h){
+      const up = String(h||'').toUpperCase();
+      const cls = up === 'SUKSES' ? 'success' : 'fail';
+      return `<span class="badge ${cls}">${up || '-'}</span>`;
+    }
+
+    function escapeHtml(str){
+      return String(str ?? '')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'","&#039;");
+    }
+
+    function computeDateRange(){
+      const val = document.getElementById('fTanggal').value;
+      if(!val) return {from:'', to:''};
+
+      const today = new Date();
+      const to = today.toISOString().slice(0,10);
+
+      if(val === 'today'){
+        return {from: to, to};
+      }
+
+      const days = parseInt(val, 10);
+      if(!isNaN(days)){
+        const d = new Date();
+        d.setDate(d.getDate() - days);
+        const from = d.toISOString().slice(0,10);
+        return {from, to};
+      }
+
+      return {from:'', to:''};
+    }
+
+    async function loadLogs(){
+      const q = document.getElementById('search').value.trim();
+      const status = document.getElementById('fStatus').value;
+      const hasil = document.getElementById('fHasil').value;
+      const limit = document.getElementById('fLimit').value;
+      const {from, to} = computeDateRange();
+
+      const params = new URLSearchParams();
+      params.set('page', String(page));
+      params.set('limit', String(limit));
+      if(q) params.set('q', q);
+      if(status) params.set('status', status);
+      if(hasil) params.set('hasil', hasil);
+      if(from) params.set('from', from);
+      if(to) params.set('to', to);
+
+      try{
+        const res = await apiFetch('/activity/list.php?' + params.toString());
+        const data = res.data;
+
+        totalPages = data.total_pages || 1;
+        document.getElementById('infoPage').textContent = `Page ${data.page} / ${totalPages} (Total ${data.total})`;
+
+        const items = data.items || [];
+        const tbody = document.getElementById('tbody');
+
+        if(!items.length){
+          tbody.innerHTML = `<tr><td colspan="7" class="muted">Belum ada log aktivitas.</td></tr>`;
+        }else{
+          tbody.innerHTML = items.map(it => {
+            const dt = fmtDateTime(it.created_at);
+            const groupArea = it.area_zone || it.nama_group || '-';
+            const user = it.user_nama || it.user_email || '-';
+
+            return `
+              <tr>
+                <td>${escapeHtml(dt.date)}</td>
+                <td>${escapeHtml(dt.time)}</td>
+                <td>${escapeHtml(groupArea)}</td>
+                <td>${escapeHtml(it.device_id)}</td>
+                <td>${escapeHtml(user)}</td>
+                <td>${badgeStatus(it.status)}</td>
+                <td>${badgeHasil(it.hasil)}</td>
+              </tr>
+            `;
+          }).join('');
+        }
+
+        // pagination buttons
+        const prev = document.getElementById('btnPrev');
+        const next = document.getElementById('btnNext');
+
+        prev.classList.toggle('disabled', page <= 1);
+        next.classList.toggle('disabled', page >= totalPages);
+
+      }catch(err){
+        showErr(err.message);
+        document.getElementById('tbody').innerHTML =
+          `<tr><td colspan="7" class="muted">Gagal load log.</td></tr>`;
+      }
+    }
+
+    // events
+    document.getElementById('search').addEventListener('input', () => {
+      page = 1;
+      loadLogs();
+    });
+
+    ['fTanggal','fStatus','fHasil','fLimit'].forEach(id => {
+      document.getElementById(id).addEventListener('change', () => {
+        page = 1;
+        loadLogs();
+      });
+    });
+
+    document.getElementById('btnPrev').addEventListener('click', () => {
+      if(page <= 1) return;
+      page -= 1;
+      loadLogs();
+    });
+
+    document.getElementById('btnNext').addEventListener('click', () => {
+      if(page >= totalPages) return;
+      page += 1;
+      loadLogs();
+    });
+
+    loadLogs();
+  </script>
+</body>
+</html>

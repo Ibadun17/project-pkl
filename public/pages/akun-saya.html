@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Akun Saya | Smart Kominfo</title>
+
+  <style>
+    :root{
+      --primary:#0a1f8f;
+      --primary-dark:#081870;
+
+      --panel:#f6f3f3;
+      --border:#e1e1e1;
+      --shadow:0 4px 10px rgba(0,0,0,.18);
+
+      --text:#2b2b2b;
+      --label:#7b7b7b;
+      --input:#efefef;
+
+      --radius:4px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:#fff;
+      color:var(--text);
+    }
+
+    .topbar{
+      height:72px;
+      background:var(--primary);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      font-weight:800;
+      font-size:28px;
+      letter-spacing:.2px;
+    }
+
+    main{
+      max-width:1100px;
+      margin:0 auto;
+      padding:34px 22px 70px;
+    }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:3px;
+      box-shadow:var(--shadow);
+      padding:44px 50px;
+      min-height:520px;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns: 360px 1fr;
+      gap:50px;
+      align-items:center;
+    }
+
+    /* Avatar */
+    .avatar{
+      width:260px;
+      height:260px;
+      border-radius:50%;
+      border:10px solid #7a7a7a;
+      background:#fdfdfd;
+      margin:0 auto;
+      position:relative;
+    }
+    .avatar:before{
+      content:"";
+      position:absolute;
+      width:92px;
+      height:92px;
+      border-radius:50%;
+      background:#7a7a7a;
+      top:60px;
+      left:50%;
+      transform:translateX(-50%);
+    }
+    .avatar:after{
+      content:"";
+      position:absolute;
+      width:150px;
+      height:90px;
+      border-radius:90px 90px 20px 20px;
+      background:#7a7a7a;
+      bottom:42px;
+      left:50%;
+      transform:translateX(-50%);
+    }
+
+    .form{max-width:520px}
+    .field{margin-bottom:18px}
+
+    label{
+      display:block;
+      font-size:18px;
+      font-weight:700;
+      color:var(--label);
+      margin:0 0 8px;
+    }
+
+    input{
+      width:100%;
+      height:38px;
+      border:1px solid #dedede;
+      background:var(--input);
+      border-radius:2px;
+      padding:0 12px;
+      font-size:14px;
+      color:#666;
+      outline:none;
+    }
+
+    .btn-row{margin-top:24px; display:flex; gap:12px; align-items:center;}
+
+    .btn{
+      background:var(--primary);
+      color:#fff;
+      border:none;
+      border-radius:4px;
+      font-weight:800;
+      padding:10px 44px;
+      font-size:18px;
+      cursor:pointer;
+      box-shadow:0 2px 6px rgba(0,0,0,.18);
+    }
+    .btn:hover{background:var(--primary-dark)}
+    .btn:active{transform:translateY(1px)}
+    .btn:disabled{opacity:.7; cursor:not-allowed}
+
+    .msg{
+      display:none;
+      margin:0 0 16px;
+      padding:10px 12px;
+      border-radius:4px;
+      font-size:14px;
+      background:#fff;
+      border:1px solid #ddd;
+      color:#444;
+    }
+    .msg.ok{border-color:#37b36b;color:#1c7f45;background:#f2fff7;}
+    .msg.err{border-color:#e34b4b;color:#a01818;background:#fff2f2;}
+
+    @media (max-width: 980px){
+      .card{padding:28px 18px}
+      .layout{grid-template-columns:1fr; gap:24px}
+      .form{max-width:100%}
+      .btn{width:100%; max-width:240px}
+      .btn-row{flex-direction:column; align-items:stretch}
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">Akun Saya</header>
+
+  <main>
+    <section class="card" aria-label="Profil Akun">
+      <div id="msg" class="msg"></div>
+
+      <div class="layout">
+        <div class="avatar" aria-hidden="true"></div>
+
+        <div class="form">
+          <div class="field">
+            <label for="nama">Nama</label>
+            <input id="nama" type="text" value="" readonly>
+          </div>
+
+          <div class="field">
+            <label for="nip">NIP</label>
+            <input id="nip" type="text" value="" readonly>
+          </div>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="text" value="" readonly>
+          </div>
+
+          <div class="field">
+            <label for="role">Role</label>
+            <input id="role" type="text" value="" readonly>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn" id="btnLogout" type="button" onclick="logout()">Logout</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../js/api.js"></script>
+  <script>
+    function showMsg(type, text){
+      const el = document.getElementById('msg');
+      el.className = 'msg ' + (type === 'ok' ? 'ok' : 'err');
+      el.textContent = text;
+      el.style.display = 'block';
+    }
+
+    async function loadMe(){
+      try{
+        const res = await apiFetch('/users/me.php');
+        const u = res.data;
+
+        document.getElementById('nama').value  = u?.nama || '-';
+        document.getElementById('nip').value   = u?.nip  || '-';
+        document.getElementById('email').value = u?.email || '-';
+        document.getElementById('role').value  = u?.role || '-';
+      }catch(err){
+        // kalau belum login / session habis -> balik ke login
+        showMsg('err', err.message);
+        setTimeout(() => window.location.href = 'login.html', 700);
+      }
+    }
+
+    async function logout(){
+      const btn = document.getElementById('btnLogout');
+      btn.disabled = true;
+      btn.textContent = 'Memproses...';
+
+      try{
+        const res = await apiFetch('/auth/logout.php', { method:'POST' });
+        showMsg('ok', res.message || 'Logout sukses');
+        setTimeout(() => window.location.href = 'login.html', 500);
+      }catch(err){
+        showMsg('err', err.message);
+        btn.disabled = false;
+        btn.textContent = 'Logout';
+      }
+    }
+
+    loadMe();
+  </script>
+</body>
+</html>

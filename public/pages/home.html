@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home | Smart Kominfo Kota Madiun</title>
+
+  <style>
+    :root{
+      --primary:#0a1f8f;
+      --primary-dark:#081870;
+      --text:#333;
+      --muted:#7d86c9;
+      --card:#f6f3f3;
+      --shadow:0 4px 10px rgba(0,0,0,.18);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:#fff;
+      color:var(--text);
+    }
+
+    .topbar{
+      height:72px;
+      background:var(--primary);
+      display:flex;
+      align-items:center;
+      padding:0 40px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      color:#fff;
+    }
+
+    .brand img{width:48px;}
+
+    .brand-text{
+      font-size:14px;
+      font-weight:700;
+      line-height:1.2;
+      text-transform:uppercase;
+    }
+
+    main{
+      min-height:calc(100vh - 72px);
+      padding:60px 20px;
+      text-align:center;
+    }
+
+    h1{
+      color:var(--primary);
+      font-size:26px;
+      margin-bottom:10px;
+    }
+
+    .subtitle{
+      color:var(--muted);
+      margin-bottom:50px;
+      font-size:18px;
+    }
+
+    .menu{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+      gap:30px;
+      max-width:900px;
+      margin:0 auto;
+    }
+
+    .menu-card{
+      background:var(--card);
+      padding:40px 20px;
+      border-radius:4px;
+      box-shadow:var(--shadow);
+      font-size:18px;
+      font-weight:700;
+      color:#3f4aa8;
+      cursor:pointer;
+      transition:.2s;
+      border:1px solid #e0e0e0;
+    }
+
+    .menu-card:hover{
+      transform:translateY(-4px);
+      box-shadow:0 6px 14px rgba(0,0,0,.22);
+      background:#f1eeee;
+    }
+
+    @media(max-width:500px){
+      h1{font-size:22px}
+      .subtitle{font-size:16px}
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="../assets/img/logo.png" alt="Logo Diskominfo">
+      <div class="brand-text">
+        DINAS KOMUNIKASI DAN INFORMATIKA<br>
+        KOTA MADIUN
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <h1>SELAMAT DATANG DI SMART KOMINFO KOTA MADIUN</h1>
+    <div class="subtitle">Silahkan Pilih Menu Di Bawah</div>
+
+    <div class="menu">
+      <div class="menu-card" onclick="go('dashboard-monitoring.html')">
+        Dashboard Monitoring
+      </div>
+
+      <div class="menu-card" onclick="go('tambah-device.html')">
+        Tambah Device
+      </div>
+
+      <div class="menu-card" onclick="go('log-aktivitas.html')">
+        Log Aktivitas
+      </div>
+
+      <div class="menu-card" onclick="go('device-group.html')">
+        Device Group
+      </div>
+
+      <div class="menu-card" onclick="go('akun-saya.html')">
+        Akun Saya
+      </div>
+
+      <div class="menu-card" onclick="go('jadwal.html')">
+        Jadwal Otomatis
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function go(page){
+      window.location.href = page;
+    }
+  </script>
+
+  <!-- Proteksi Login -->
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script>
+    requireAuth(); // kalau belum login -> redirect login.html
+  </script>
+</body>
+</html>

@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Device Group | Smart Kominfo</title>
+
+  <style>
+    :root{
+      --primary:#0a1f8f;
+      --primary-dark:#081870;
+
+      --panel:#f6f3f3;
+      --panel-2:#f1f1f1;
+      --header-row:#dfe7ea;
+
+      --border:#d7d7d7;
+      --shadow:0 4px 10px rgba(0,0,0,.18);
+
+      --text:#2c2c2c;
+      --muted:#a6a6a6;
+
+      --green:#7be087;
+      --green-text:#0c6a22;
+
+      --red:#ff6b6b;
+      --red-text:#8b0d0d;
+
+      --radius:4px;
+    }
+
+    *{box-sizing:border-box}
+    body{margin:0;font-family: Arial, Helvetica, sans-serif;background:#fff;color:var(--text);}
+
+    .topbar{
+      height:72px;background:var(--primary);
+      display:flex;align-items:center;justify-content:center;
+      color:#fff;font-weight:800;font-size:28px;letter-spacing:.2px;
+    }
+
+    main{max-width:1100px;margin:0 auto;padding:18px 22px 60px;}
+
+    .top-actions{
+      display:grid;grid-template-columns: 1fr 260px;gap:26px;
+      align-items:center;margin-bottom:18px;
+    }
+
+    .search-wrap{
+      background:var(--panel);
+      border:1px solid #e3e3e3;border-radius:3px;
+      padding:10px 14px;display:flex;align-items:center;gap:10px;
+      box-shadow:0 2px 6px rgba(0,0,0,.08);
+    }
+    .search-wrap svg{opacity:.6}
+    .search{
+      width:100%;border:none;outline:none;background:transparent;
+      font-size:18px;color:#777;
+    }
+    .search::placeholder{color:#bcbcbc}
+
+    .btn-add{
+      height:44px;width:100%;
+      background:var(--primary);color:#fff;border:none;border-radius:3px;
+      font-size:22px;font-weight:800;cursor:pointer;
+      box-shadow:0 2px 6px rgba(0,0,0,.18);
+    }
+    .btn-add:hover{background:var(--primary-dark)}
+    .btn-add:active{transform:translateY(1px)}
+
+    .group-card{
+      background:var(--panel-2);
+      border:1px solid var(--border);
+      border-radius:3px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      margin: 22px 0;
+    }
+
+    .group-top{
+      display:flex;justify-content:space-between;gap:18px;
+      padding:18px 18px 10px;background:#efefef;
+    }
+
+    .group-info{
+      line-height:1.55;font-size:18px;font-weight:800;color:#111;
+    }
+    .group-info .line{font-weight:800}
+    .group-info .val{font-weight:700}
+
+    .status-actions{
+      display:flex;gap:12px;align-items:flex-start;padding-top:2px;
+    }
+
+    .pill{
+      border:none;padding:6px 16px;font-weight:900;border-radius:2px;
+      box-shadow:0 2px 6px rgba(0,0,0,.18);
+      cursor:pointer;font-size:18px;user-select:none;
+    }
+    .pill.on{background:var(--green); color:var(--green-text)}
+    .pill.off{background:var(--red); color:var(--red-text)}
+    .pill.active{outline:2px solid rgba(10,31,143,.25);transform: translateY(-1px);}
+
+    table{width:100%;border-collapse:collapse;}
+    thead th{
+      text-align:left;padding:10px 18px;background:var(--header-row);
+      font-size:18px;font-weight:900;color:#2c2c2c;
+      border-top:1px solid #d6d6d6;border-bottom:1px solid #d6d6d6;
+    }
+    tbody td{
+      padding:12px 18px;border-bottom:1px solid #dedede;
+      background:#f7f7f7;color:#777;height:44px;
+      vertical-align:middle;
+    }
+
+    .badge{
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:2px;
+      font-weight:900;
+      min-width:64px;
+      text-align:center;
+      color:#fff;
+    }
+    .badge.on{background:#2fa86a}
+    .badge.off{background:#e34b4b}
+
+    .muted{color:#888}
+
+    .msg{
+      display:none;
+      margin:14px 0 0;
+      padding:10px 12px;
+      border-radius:4px;
+      font-size:14px;
+      background:#fff;
+      border:1px solid #ddd;
+      color:#444;
+    }
+    .msg.ok{border-color:#37b36b;color:#1c7f45;background:#f2fff7;}
+    .msg.err{border-color:#e34b4b;color:#a01818;background:#fff2f2;}
+
+    @media (max-width: 980px){
+      .top-actions{grid-template-columns:1fr; gap:14px}
+      .btn-add{font-size:18px}
+      .group-top{flex-direction:column}
+      .status-actions{justify-content:flex-start}
+      .group-info{font-size:16px}
+      thead th{font-size:16px}
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">Device Grup</header>
+
+  <main>
+    <section class="top-actions" aria-label="Pencarian dan Tambah Group">
+      <div class="search-wrap" role="search">
+        <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#666" d="M10 2a8 8 0 105.293 14.293l4.207 4.207 1.414-1.414-4.207-4.207A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
+        </svg>
+        <input id="search" class="search" type="text" placeholder="Cari ID Device, Group, Lokasi" />
+      </div>
+
+      <button class="btn-add" type="button" onclick="window.location.href='tambah-group.html'">
+        Tambah Group
+      </button>
+    </section>
+
+    <div id="msg" class="msg"></div>
+
+    <!-- container dinamis -->
+    <div id="groupsWrap"></div>
+  </main>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script>
+    requireAuth();
+
+    let GROUPS = [];
+
+    function showMsg(type, text){
+      const el = document.getElementById('msg');
+      el.className = 'msg ' + (type === 'ok' ? 'ok' : 'err');
+      el.textContent = text;
+      el.style.display = 'block';
+    }
+
+    function escapeHtml(str){
+      return String(str ?? '')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'","&#039;");
+    }
+
+    function normalizeStatus(v){
+      if (v === true) return 'ON';
+      if (v === false) return 'OFF';
+      const up = String(v || '').toUpperCase();
+      return up === 'ON' ? 'ON' : 'OFF';
+    }
+
+    function badge(status){
+      const s = normalizeStatus(status);
+      return `<span class="badge ${s === 'ON' ? 'on' : 'off'}">${s}</span>`;
+    }
+
+    function nowTime(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
+    // cache status per device_id supaya tidak call Tuya berkali-kali
+    async function fetchTuyaStatusCached(deviceId, cache){
+      if (cache[deviceId]) return cache[deviceId];
+      // status.php kamu sebelumnya return array status (rr.data)
+      // kalau kamu pakai check.php yang return {device,status}, bisa ganti di sini.
+      try{
+        const rr = await apiFetch('/tuya/check.php?device_id=' + encodeURIComponent(deviceId));
+        const device = rr.data?.device || {};
+        const statusArr = rr.data?.status || [];
+        cache[deviceId] = { device, statusArr };
+        return cache[deviceId];
+      }catch(e){
+        cache[deviceId] = { device: {online:false}, statusArr: [] };
+        return cache[deviceId];
+      }
+    }
+
+    function groupCardHtml(g){
+      const nama = g.nama_group || 'Nama Grup';
+      const lokasi = g.lokasi || '-';
+      const area = g.area_zone || '-';
+
+      // karena model baru: g.lamps = list lampu, semuanya pakai device_id yang sama (umumnya)
+      const firstDeviceId = (g.lamps && g.lamps.length) ? g.lamps[0].device_id : '-';
+
+      const rows = (g.lamps || []).map(l => `
+        <tr>
+          <td>${escapeHtml(l.lampu_nama || '-')}</td>
+          <td>${escapeHtml(l.tuya_code || '-')}</td>
+          <td class="js-status" data-device-id="${escapeHtml(l.device_id)}" data-code="${escapeHtml(l.tuya_code)}">${badge('OFF')}</td>
+          <td class="js-time">${escapeHtml(nowTime())}</td>
+          <td class="js-online" data-device-id="${escapeHtml(l.device_id)}">-</td>
+        </tr>
+      `).join('');
+
+      const searchHay = (nama+' '+lokasi+' '+area+' '+firstDeviceId).toLowerCase();
+
+      return `
+        <section class="group-card group-item" data-search="${escapeHtml(searchHay)}" data-group-id="${g.id}">
+          <div class="group-top">
+            <div class="group-info">
+              <div class="line">${escapeHtml(nama)}</div>
+              <div class="line">Device ID: <span class="val">${escapeHtml(firstDeviceId)}</span></div>
+              <div class="line">Lokasi : <span class="val">${escapeHtml(lokasi)}</span></div>
+            </div>
+
+            <div class="status-actions">
+              <button class="pill on" type="button" onclick="switchAllInGroup(${g.id}, 'ON')">ON</button>
+              <button class="pill off" type="button" onclick="switchAllInGroup(${g.id}, 'OFF')">OFF</button>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Nama Device</th>
+                <th>Lampu</th>
+                <th>Status</th>
+                <th>Waktu</th>
+                <th>Koneksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${
+                (g.lamps && g.lamps.length)
+                  ? rows
+                  : `<tr><td colspan="5" class="muted">Belum ada lampu di group ini.</td></tr>`
+              }
+            </tbody>
+          </table>
+        </section>
+      `;
+    }
+
+    function filterGroups(){
+      const q = document.getElementById('search').value.toLowerCase().trim();
+      document.querySelectorAll('.group-item').forEach(it => {
+        const hay = (it.getAttribute('data-search') || '');
+        it.style.display = hay.includes(q) ? '' : 'none';
+      });
+    }
+
+    async function enrichStatuses(groups){
+      const cache = {}; // deviceId -> {device,statusArr}
+
+      // kumpulkan semua device_id unik
+      const deviceIds = new Set();
+      groups.forEach(g => (g.lamps||[]).forEach(l => deviceIds.add(l.device_id)));
+
+      // fetch status untuk tiap device (sekali saja)
+      await Promise.all(Array.from(deviceIds).map(id => fetchTuyaStatusCached(id, cache)));
+
+      // update DOM: status dan koneksi
+      document.querySelectorAll('.js-online').forEach(cell => {
+        const id = cell.getAttribute('data-device-id');
+        const online = cache[id]?.device?.online;
+        cell.textContent = online ? 'Online' : 'Offline';
+      });
+
+      document.querySelectorAll('.js-status').forEach(cell => {
+        const id = cell.getAttribute('data-device-id');
+        const code = cell.getAttribute('data-code');
+        const statusArr = cache[id]?.statusArr || [];
+
+        const found = statusArr.find(x => x.code === code);
+        const val = found ? found.value : false;
+        cell.innerHTML = badge(val);
+      });
+    }
+
+    async function loadGroups(){
+      const res = await apiFetch('/groups/list.php');
+      GROUPS = res.data || [];
+
+      const wrap = document.getElementById('groupsWrap');
+      if(!GROUPS.length){
+        wrap.innerHTML = `<div class="muted">Belum ada group. Klik tombol "Tambah Group".</div>`;
+        return;
+      }
+
+      wrap.innerHTML = GROUPS.map(groupCardHtml).join('');
+
+      // setelah render, ambil status dari Tuya dan update ke tabel
+      await enrichStatuses(GROUPS);
+
+      // kalau habis tambah group, tampilkan flash
+      const flash = sessionStorage.getItem('flash_ok');
+      if (flash) {
+        sessionStorage.removeItem('flash_ok');
+        showMsg('ok', flash);
+      }
+    }
+
+    async function switchAllInGroup(groupId, status){
+      // ambil group dari data
+      const g = GROUPS.find(x => String(x.id) === String(groupId));
+      if(!g || !(g.lamps||[]).length){
+        showMsg('err', 'Group belum punya lampu.');
+        return;
+      }
+
+      // disable tombol sementara
+      const card = document.querySelector(`[data-group-id="${groupId}"]`);
+      const btnOn = card.querySelector('.pill.on');
+      const btnOff = card.querySelector('.pill.off');
+      btnOn.disabled = true; btnOff.disabled = true;
+
+      try{
+        // loop semua lampu di group: panggil switch.php dengan code masing-masing
+        for (const l of g.lamps){
+          await apiFetch('/tuya/switch.php', {
+            method: 'POST',
+            body: {
+              device_id: l.device_id,
+              status: status,
+              code: l.tuya_code
+            }
+          });
+        }
+
+        showMsg('ok', `Berhasil set semua lampu group menjadi ${status}`);
+        await loadGroups(); // reload supaya status tabel ikut update
+
+      }catch(err){
+        showMsg('err', err.message);
+      }finally{
+        btnOn.disabled = false; btnOff.disabled = false;
+      }
+    }
+
+    // expose to inline onclick
+    window.switchAllInGroup = switchAllInGroup;
+
+    document.getElementById('search').addEventListener('input', () => {
+      filterGroups();
+    });
+
+    loadGroups();
+  </script>
+</body>
+</html>
