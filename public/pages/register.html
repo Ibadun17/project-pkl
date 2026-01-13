@@ -93,7 +93,7 @@
 
       <div id="msg" class="msg"></div>
 
-      <form id="registerForm">
+      <form id="registerForm" novalidate>
         <div class="field">
           <label for="email">Email</label>
           <input id="email" type="email" placeholder="Masukkan Email" autocomplete="email">
@@ -127,6 +127,13 @@
       el.style.display = 'block';
     }
 
+    function normalizeErr(err){
+      if (!err) return 'Terjadi kesalahan.';
+      if (typeof err === 'string') return err;
+      if (err.message) return err.message;
+      return 'Terjadi kesalahan.';
+    }
+
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -157,10 +164,10 @@
           body: { email, password }
         });
 
-        showMsg('ok', res.message || 'Register sukses, silakan login');
+        showMsg('ok', (res && res.message) ? res.message : 'Register sukses, silakan login');
         setTimeout(() => window.location.href = 'login.html', 700);
       }catch(err){
-        showMsg('err', err.message);
+        showMsg('err', normalizeErr(err));
       }finally{
         btn.disabled = false;
         btn.textContent = 'Daftar';

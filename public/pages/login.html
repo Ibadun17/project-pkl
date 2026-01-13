@@ -104,7 +104,7 @@
 
       <div id="msg" class="msg"></div>
 
-      <form id="loginForm">
+      <form id="loginForm" novalidate>
         <div class="field">
           <label>Email/Username</label>
           <input id="email" type="text" placeholder="Masukkan Email/Username" autocomplete="username">
@@ -114,7 +114,7 @@
           <label>Password</label>
           <div class="password-wrapper">
             <input id="password" type="password" placeholder="Masukkan Password" autocomplete="current-password">
-            <button type="button" class="toggle-password" onclick="togglePassword()">👁</button>
+            <button type="button" class="toggle-password" id="togglePassBtn">👁</button>
           </div>
         </div>
 
@@ -125,7 +125,7 @@
     <div class="footer">
       <p><b>Belum Punya Akun?</b> <a href="register.html">Daftar</a></p>
       <button class="google-btn" type="button" onclick="alert('Google login belum diaktifkan')">
-        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="">
         Login dengan Google
       </button>
     </div>
@@ -133,16 +133,24 @@
 
   <script src="../js/api.js"></script>
   <script>
-    function togglePassword(){
+    // Toggle password (lebih aman: tanpa inline onclick)
+    document.getElementById('togglePassBtn').addEventListener('click', () => {
       const pass = document.getElementById('password');
       pass.type = pass.type === 'password' ? 'text' : 'password';
-    }
+    });
 
     function showMsg(type, text){
       const el = document.getElementById('msg');
       el.className = 'msg ' + (type === 'ok' ? 'ok' : 'err');
       el.textContent = text;
       el.style.display = 'block';
+    }
+
+    function normalizeErr(err){
+      if (!err) return 'Terjadi kesalahan.';
+      if (typeof err === 'string') return err;
+      if (err.message) return err.message;
+      return 'Terjadi kesalahan.';
     }
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -166,11 +174,10 @@
           body: { email, password }
         });
 
-        showMsg('ok', res.message || 'Login sukses');
-        // sukses -> masuk home
+        showMsg('ok', (res && res.message) ? res.message : 'Login sukses');
         setTimeout(() => window.location.href = 'home.html', 500);
       }catch(err){
-        showMsg('err', err.message);
+        showMsg('err', normalizeErr(err));
       }finally{
         btn.disabled = false;
         btn.textContent = 'Masuk';

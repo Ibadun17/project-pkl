@@ -25,7 +25,5 @@ $_SESSION['user_id'] = (int)$user['id'];
 ok([
   'id' => (int)$user['id'],
   'email' => $user['email'],
-  'role' => $user['role'],
   'nama' => $user['nama'],
-  'nip' => $user['nip'],
 ], 'Login sukses');
