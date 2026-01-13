@@ -1,10 +1,8 @@
 async function apiFetch(path, options = {}) {
-  // Ambil base path project dari URL (support folder yang ada spasi)
-  // contoh: /PKL%20Project/public/pages/tambah-device.html -> basePath = /PKL%20Project
   const parts = window.location.pathname.split('/public/');
   const basePath = parts.length > 1 ? parts[0] : '';
 
-  const API_BASE = window.location.origin + basePath + '/api';
+  const API_BASE = 'http://10.11.15.188:85/api';
   const url = API_BASE + path;
 
   const method = options.method || 'GET';
